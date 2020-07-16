@@ -92,6 +92,7 @@ async function main(auth) {
       GD.processZipFiles(fileNames, drive),
       GD.processTxtFiles(fileNames, drive),
     ]).then((result) => {
+      console.log("here", result);
       MessageParser.getFiles("./extracted").then((files) => {
         let textFiles = files.filter(
           (file) => file.includes(".txt") && !file.includes("/__MACOSX")

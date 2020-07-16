@@ -3,15 +3,7 @@
 import React, { useState } from "react"
 import { navigate } from "gatsby"
 import useAuth from "../hooks/useAuth"
-import {
-  Heading,
-  Paragraph,
-  Text,
-  TextInput,
-  Box,
-  Image,
-  Button,
-} from "grommet"
+import { Heading, TextInput, Box, Image, Button } from "grommet"
 import { useStaticQuery, graphql } from "gatsby"
 
 const Login = ({ redirect }) => {
