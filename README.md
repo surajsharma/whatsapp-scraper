@@ -1,6 +1,6 @@
 ![project logo](docs/images/project-logo.png)
 
-### Developing Localy
+### Developing Locally
 
 There are three main parts to the Scraper.
 
