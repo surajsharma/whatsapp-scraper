@@ -41,6 +41,19 @@ async function createTag(token, payload) {
   console.log(data);
 }
 
+async function updateGroupWithMessages(id, token, payload) {
+  const { data } = await axios({
+    method: "PUT",
+    url: process.env.STRAPI_URL + `/whatsapp-groups/${id}`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    data: { messages: payload },
+  });
+
+  return data;
+}
+
 async function createGroup(token, payload) {
   // GROUP SCHEMA
   // {
@@ -56,7 +69,27 @@ async function createGroup(token, payload) {
     },
     data: payload,
   });
-  console.log(data);
+
+  return data;
+}
+
+async function createMessage(token, payload) {
+  //  {
+  //     date: '2020-02-01T15:12:00.000Z',
+  //     author: '+91 80088 86380',
+  //     message: '<Media omitted>'
+  //   }
+
+  const { data } = await axios({
+    method: "POST",
+    url: process.env.STRAPI_URL + "/messages/",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    data: payload,
+  });
+
+  return data;
 }
 
 async function getGroups(token) {
@@ -99,23 +132,80 @@ async function getAuthToken() {
   }
 }
 
+async function deleteAllMessages(token) {
+  axios
+    .get(process.env.STRAPI_URL + "/messages/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => {
+      // Handle success.
+      //   console.log("Data: ", response.data);
+      response.data.forEach((r) => {
+        axios({
+          method: "DELETE",
+          url: process.env.STRAPI_URL + `/messages/${r.id}`,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(`Deleted message ${response.id}`);
+      });
+    })
+    .catch((error) => {
+      // Handle error.
+      console.log("An error occurred:", error.response);
+    });
+}
+
+async function del() {
+  token = await getAuthToken();
+  deleteAllMessages(token);
+}
+
 async function main() {
   console.log("Uploading JSON to strapi");
   if (fsx.pathExistsSync("./JSON")) {
     console.log("JSON folder exists");
     token = await getAuthToken();
-
     MessageParser.getFiles("./JSON").then((files) => {
       if (files.length && token) {
         // ADD GROUPS
-        files.forEach((file) => {
+        files.forEach(async (file) => {
+          const messages = fsx.readJsonSync(file);
+          const messageIds = [];
+
+          // CREATE NEW GROUP
           let front = "json/whatsapp chat with ".length;
           let group = {
             name: file.substring(front, file.length - 25),
-            messages: [],
           };
+          const newGroup = await createGroup(token, group);
+          console.log(newGroup);
 
-          createGroup(token, group);
+          // CREATE MESSAGES
+          messages.forEach(async (message) => {
+            const payloadMessage = {
+              content: message.message,
+              author: message.author,
+              whatsapp_group: newGroup.id,
+              tags: [],
+            };
+
+            const newMessage = await createMessage(token, payloadMessage);
+            console.log(newMessage);
+            messageIds.push(newMessage.id);
+            console.log("New Message Added", newMessage.id, messageIds);
+          });
+
+          const gUpdate = await updateGroupWithMessages(
+            newGroup.id,
+            token,
+            messageIds
+          );
+
+          console.log(gUpdate, "group Updated");
         });
       }
     });
@@ -127,3 +217,4 @@ async function main() {
 }
 
 main();
+// del();

@@ -101,6 +101,7 @@ async function main(auth) {
         textFiles.forEach((file, index) => {
           // console.log(`current: ${file}, \nnext: ${textFiles[index + 1]}\n\n`);
           //if text file found
+          console.log("file to getJSON", file);
           MessageParser.getJSON(file).then((messages) => {
             // get messages from txt file
             const jsonString = JSON.stringify(messages);

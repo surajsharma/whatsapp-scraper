@@ -11,13 +11,19 @@
   "attributes": {
     "content": {
       "type": "text",
-      "required": true
-    },
-    "whatsapp_group": {
-      "model": "whatsapp-group"
+      "required": true,
+      "unique": true
     },
     "tags": {
       "collection": "tag",
+      "via": "messages"
+    },
+    "author": {
+      "type": "string",
+      "required": false
+    },
+    "whatsapp_group": {
+      "model": "whatsapp-group",
       "via": "messages"
     }
   }
